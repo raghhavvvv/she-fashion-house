@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - She Fashion House</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: white;
+        }
+        .error-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .error-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            margin: 0 0 20px 0;
+            font-size: 28px;
+        }
+        p {
+            margin: 0 0 20px 0;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+        .retry-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .retry-btn:hover {
+            background: #45a049;
+        }
+        .details {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        .details h3 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+        }
+        .details ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .details li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon">⚠️</div>
+        <h1>Application Error</h1>
+        <p>There was an issue starting the She Fashion House application. This usually happens when the server process cannot start properly.</p>
+        
+        <button class="retry-btn" onclick="location.reload()">Retry</button>
+        
+        <div class="details">
+            <h3>Troubleshooting Steps:</h3>
+            <ul>
+                <li>Make sure no other application is using port 3000</li>
+                <li>Check that all files are properly extracted</li>
+                <li>Try running the application as administrator</li>
+                <li>Ensure your antivirus isn't blocking the application</li>
+            </ul>
+        </div>
+        
+        <p style="margin-top: 20px; font-size: 14px; opacity: 0.7;">
+            If the problem persists, please contact support with the error details from the console.
+        </p>
+    </div>
+</body>
+</html>

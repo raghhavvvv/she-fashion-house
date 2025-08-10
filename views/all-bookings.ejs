@@ -1,0 +1,465 @@
+<% filters = typeof filters !== 'undefined' ? filters : {} %>
+<%- include('partials/header') %>
+<%- include('partials/nav') %>
+
+<main>
+    <h1>All Bookings</h1>
+    
+    <!-- Error message display -->
+    <% if (typeof error !== 'undefined' && error) { %>
+        <div class="error-message">
+            <strong>Error:</strong> <%= error %>
+        </div>
+    <% } %>
+    
+    <!-- Results summary -->
+    <% if (typeof totalResults !== 'undefined') { %>
+        <div class="results-summary">
+            <p>Found <strong><%= totalResults %></strong> booking(s) matching your criteria</p>
+        </div>
+    <% } %>
+    
+    <!-- Active filters display -->
+    <% 
+    const activeFilters = [];
+    if (filters.search_query) activeFilters.push(`Search: "${filters.search_query}"`);
+    if (filters.booking_date) activeFilters.push(`Booking Date: ${filters.booking_date}`);
+    if (filters.delivery_date) activeFilters.push(`Delivery Date: ${filters.delivery_date}`);
+    if (filters.phone_number) activeFilters.push(`Phone: ${filters.phone_number}`);
+    if (filters.cloth_color) activeFilters.push(`Color: ${filters.cloth_color}`);
+    if (filters.emergency === '1') activeFilters.push('Emergency: Yes');
+    if (filters.emergency === '0') activeFilters.push('Emergency: No');
+    if (filters.delivery_status) activeFilters.push(`Delivery Status: ${filters.delivery_status}`);
+    if (filters.delivery_date_status) activeFilters.push(`Date Status: ${filters.delivery_date_status}`);
+    %>
+    
+    <% if (activeFilters.length > 0) { %>
+        <div class="active-filters">
+            <strong>Active Filters:</strong>
+            <% activeFilters.forEach(filter => { %>
+                <span class="filter-tag"><%= filter %></span>
+            <% }) %>
+        </div>
+    <% } %>
+
+    <!-- TOOLBAR - Restructured for simplicity and reliability -->
+    <div class="toolbar">
+        <!-- Enhanced search form with better UX -->
+        <form action="/bookings" method="GET" class="search-form" id="searchForm">
+            <div class="search-input-group">
+                <input 
+                    type="text" 
+                    name="search_query" 
+                    id="searchInput"
+                    placeholder="Search by customer name..." 
+                    value="<%= filters.search_query || '' %>"
+                    minlength="2"
+                    required>
+                <button type="submit" class="btn-action" id="searchBtn">
+                    <span class="search-icon">🔍</span>
+                    Search
+                </button>
+            </div>
+        </form>
+
+        <!-- Other buttons are now clearly separate -->
+        <a href="/bookings" class="btn-secondary">Clear</a>
+        <!-- The Filter button now uses proper event handling -->
+        <button 
+            type="button" 
+            id="openFilterModalBtn" 
+            class="btn-primary">
+            Filter Bookings
+        </button>
+        
+        <!-- Export filtered results -->
+        <% if (bookings.length > 0) { %>
+            <button 
+                type="button" 
+                id="exportBtn" 
+                class="btn-secondary">
+                📊 Export Results
+            </button>
+        <% } %>
+    </div>
+
+    <div class="table-container">
+        <!-- Table HTML remains the same... -->
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Customer Name</th>
+                    <th>Phone</th>
+                    <th>Cloth Color</th>
+                    <th>Delivery Date</th>
+                    <th>Total Amt</th>
+                    <th>Amt Paid</th>
+                    <th>Delivery Status</th>
+                    <th>Payment Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (bookings.length > 0) { %>
+                    <% bookings.forEach(booking => { %>
+                        <tr>
+                            <td><%= booking.id %></td>
+                            <td><%= booking.customer_name %></td>
+                            <td><%= booking.phone_number %></td>
+                            <td><%= booking.cloth_color %></td>
+                            <td><%= booking.delivery_date %></td>
+                            <td>₹<%= booking.total_amount %></td>
+                            <td>₹<%= booking.amount_paid %></td>
+                            <td><span class="status <%= booking.delivery_status.toLowerCase().replace(' ', '-') %>"><%= booking.delivery_status %></span></td>
+                            <td><span class="status <%= booking.payment_status.toLowerCase().replace(' ', '-') %>"><%= booking.payment_status %></span></td>
+                            <td class="action-buttons">
+                                <form action="/toggle-delivery/<%= booking.id %>" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn-action btn-delivered"><%= booking.delivery_status === 'Delivered' ? 'Mark Undelivered' : 'Mark Delivered' %></button>
+                                </form>
+                                <form action="/delete-booking/<%= booking.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to move this to the bin?');">
+                                    <button type="submit" class="btn-action btn-delete">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="10" style="text-align: center; padding: 20px;">
+                            <% if (Object.keys(filters).length > 0) { %>
+                                No bookings found matching your current filters. 
+                                <a href="/bookings" class="btn-secondary" style="margin-left: 10px;">Clear Filters</a>
+                            <% } else { %>
+                                No bookings found in the system.
+                            <% } %>
+                        </td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<!-- Filter Modal HTML with inline onclick for closing -->
+<div id="filterModal" class="modal">
+    <div class="modal-content">
+        <form id="filterForm" action="/bookings" method="GET">
+            <div class="modal-header">
+                <h2>Filter Bookings</h2>
+                <!-- Close button with proper event handling -->
+                <span class="close-btn">&times;</span>
+            </div>
+            <div class="form-grid">
+                <!-- All input and select fields remain the same -->
+                <div>
+                    <label for="booking_date">Booking Date</label>
+                    <input type="date" name="booking_date" value="<%= filters.booking_date || '' %>">
+                </div>
+                <div>
+                    <label for="delivery_date">Delivery Date</label>
+                    <input type="date" name="delivery_date" value="<%= filters.delivery_date || '' %>">
+                </div>
+                <div>
+                    <label for="phone_number">Phone Number</label>
+                    <input type="text" name="phone_number" placeholder="Enter phone number" value="<%= filters.phone_number || '' %>">
+                </div>
+                <div>
+                    <label for="cloth_color">Cloth Color (Exact Match)</label>
+                    <input type="text" name="cloth_color" placeholder="Enter exact cloth color" value="<%= filters.cloth_color || '' %>">
+                </div>
+                <div>
+                    <label for="emergency">Emergency</label>
+                    <select name="emergency">
+                        <option value="" <%= !filters.emergency ? 'selected' : '' %>>All</option>
+                        <option value="1" <%= filters.emergency === '1' ? 'selected' : '' %>>Yes</option>
+                        <option value="0" <%= filters.emergency === '0' ? 'selected' : '' %>>No</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="delivery_status">Delivery Status</label>
+                    <select name="delivery_status">
+                        <option value="" <%= !filters.delivery_status ? 'selected' : '' %>>All</option>
+                        <option value="Delivered" <%= filters.delivery_status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                        <option value="Not Delivered" <%= filters.delivery_status === 'Not Delivered' ? 'selected' : '' %>>Not Delivered</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="delivery_date_status">Delivery Date Status</label>
+                    <select name="delivery_date_status">
+                        <option value="" <%= !filters.delivery_date_status ? 'selected' : '' %>>All</option>
+                        <option value="past" <%= filters.delivery_date_status === 'past' ? 'selected' : '' %>>Past</option>
+                        <option value="today" <%= filters.delivery_date_status === 'today' ? 'selected' : '' %>>Today</option>
+                        <option value="upcoming" <%= filters.delivery_date_status === 'upcoming' ? 'selected' : '' %>>Upcoming</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <!-- Close button with proper event handling -->
+                <button type="button" class="btn-secondary">Close</button>
+                <button type="submit" class="btn-primary">Apply Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+    <!-- Include JavaScript for enhanced functionality -->
+    <script>
+        // Immediate debugging
+        console.log('Script tag loaded');
+        
+        // Search and Filter functionality for All Bookings page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing search and filter functionality...');
+            
+            // Modal functionality
+            const filterModal = document.getElementById('filterModal');
+            const openFilterBtn = document.getElementById('openFilterModalBtn');
+            const closeBtn = document.querySelector('.close-btn');
+            const closeModalBtn = document.querySelector('.btn-secondary');
+
+            console.log('Elements found:', {
+                filterModal: !!filterModal,
+                openFilterBtn: !!openFilterBtn,
+                closeBtn: !!closeBtn,
+                closeModalBtn: !!closeModalBtn
+            });
+
+            // Open modal
+            if (openFilterBtn) {
+                openFilterBtn.addEventListener('click', function() {
+                    console.log('Opening filter modal...');
+                    filterModal.style.display = 'block';
+                });
+            }
+
+            // Close modal
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function() {
+                    console.log('Closing filter modal...');
+                    filterModal.style.display = 'none';
+                });
+            }
+
+            if (closeModalBtn) {
+                closeModalBtn.addEventListener('click', function() {
+                    console.log('Closing filter modal...');
+                    filterModal.style.display = 'none';
+                });
+            }
+
+            // Close modal when clicking outside
+            window.addEventListener('click', function(event) {
+                if (event.target === filterModal) {
+                    console.log('Closing modal (outside click)...');
+                    filterModal.style.display = 'none';
+                }
+            });
+
+            // Enhanced search functionality
+            const searchForm = document.querySelector('.search-form');
+            const searchInput = document.querySelector('input[name="search_query"]');
+
+            console.log('Search elements found:', {
+                searchForm: !!searchForm,
+                searchInput: !!searchInput
+            });
+
+            if (searchForm && searchInput) {
+                // Real-time search suggestions (optional enhancement)
+                searchInput.addEventListener('input', function() {
+                    const query = this.value.trim();
+                    if (query.length > 0) {
+                        console.log('Searching for:', query);
+                    }
+                });
+
+                // Form validation
+                searchForm.addEventListener('submit', function(e) {
+                    const query = searchInput.value.trim();
+                    console.log('Search form submitted with query:', query);
+                    if (query.length === 0) {
+                        e.preventDefault();
+                        alert('Please enter a search term');
+                        searchInput.focus();
+                    }
+                });
+            }
+
+            // Filter form enhancement
+            const filterForm = document.getElementById('filterForm');
+            if (filterForm) {
+                console.log('Filter form found, adding event listeners...');
+                filterForm.addEventListener('submit', function(e) {
+                    console.log('Filter form submitted...');
+                    // Validate that at least one filter is applied
+                    const formData = new FormData(this);
+                    let hasFilters = false;
+                    
+                    for (let [key, value] of formData.entries()) {
+                        if (value && value.trim() !== '') {
+                            hasFilters = true;
+                            break;
+                        }
+                    }
+
+                    if (!hasFilters) {
+                        e.preventDefault();
+                        alert('Please select at least one filter criteria');
+                        return;
+                    }
+
+                    // Show loading state
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.textContent = 'Applying...';
+                        submitBtn.disabled = true;
+                    }
+                });
+            }
+
+            // Clear filters functionality
+            const clearBtn = document.querySelector('a[href="/bookings"]');
+            if (clearBtn) {
+                clearBtn.addEventListener('click', function(e) {
+                    console.log('Clear button clicked...');
+                    e.preventDefault();
+                    // Clear all form inputs
+                    const searchInput = document.querySelector('input[name="search_query"]');
+                    if (searchInput) searchInput.value = '';
+                    
+                    // Clear filter modal inputs
+                    const filterInputs = filterModal.querySelectorAll('input, select');
+                    filterInputs.forEach(input => {
+                        if (input.type === 'select-one') {
+                            input.selectedIndex = 0;
+                        } else {
+                            input.value = '';
+                        }
+                    });
+                    
+                    // Redirect to clean bookings page
+                    window.location.href = '/bookings';
+                });
+            }
+
+            // Export functionality
+            const exportBtn = document.getElementById('exportBtn');
+            if (exportBtn) {
+                console.log('Export button found, adding event listener...');
+                exportBtn.addEventListener('click', function() {
+                    console.log('Export button clicked...');
+                    exportToCSV();
+                });
+            }
+
+            function exportToCSV() {
+                const table = document.querySelector('table');
+                const rows = table.querySelectorAll('tbody tr');
+                
+                if (rows.length === 0) {
+                    alert('No data to export');
+                    return;
+                }
+
+                // Get headers
+                const headers = [];
+                const headerRow = table.querySelector('thead tr');
+                headerRow.querySelectorAll('th').forEach(th => {
+                    headers.push(th.textContent.trim());
+                });
+
+                // Get data rows
+                const csvData = [];
+                rows.forEach(row => {
+                    const rowData = [];
+                    row.querySelectorAll('td').forEach((td, index) => {
+                        // Skip the Actions column
+                        if (index < headers.length - 1) {
+                            rowData.push(`"${td.textContent.trim()}"`);
+                        }
+                    });
+                    csvData.push(rowData.join(','));
+                });
+
+                // Combine headers and data
+                const csvContent = [headers.join(','), ...csvData].join('\n');
+                
+                // Create and download file
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `bookings_export_${new Date().toISOString().slice(0, 10)}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                // Ctrl/Cmd + F to open filter modal
+                if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                    e.preventDefault();
+                    if (filterModal) {
+                        filterModal.style.display = 'block';
+                    }
+                }
+                
+                // Escape to close modal
+                if (e.key === 'Escape') {
+                    if (filterModal && filterModal.style.display === 'block') {
+                        filterModal.style.display = 'none';
+                    }
+                }
+            });
+
+            console.log('Search and filter functionality initialized successfully!');
+        });
+        
+        // Fallback initialization in case DOMContentLoaded doesn't fire
+        if (document.readyState === 'loading') {
+            console.log('Document still loading, waiting for DOMContentLoaded...');
+        } else {
+            console.log('Document already loaded, initializing immediately...');
+            // Trigger initialization manually
+            const event = new Event('DOMContentLoaded');
+            document.dispatchEvent(event);
+        }
+        
+        // Additional fallback for immediate execution
+        setTimeout(function() {
+            console.log('Fallback timeout executed');
+            if (!window.searchInitialized) {
+                console.log('Search not initialized, trying to initialize now...');
+                window.searchInitialized = true;
+                // Try to initialize again
+                const event = new Event('DOMContentLoaded');
+                document.dispatchEvent(event);
+            }
+        }, 1000);
+        
+        // Test basic functionality immediately
+        console.log('Testing basic functionality...');
+        console.log('Search form element:', document.getElementById('searchForm'));
+        console.log('Search input element:', document.getElementById('searchInput'));
+        console.log('Filter modal element:', document.getElementById('filterModal'));
+        
+        // Try to add a simple click handler immediately
+        const testBtn = document.getElementById('openFilterModalBtn');
+        if (testBtn) {
+            console.log('Found filter button, adding immediate click handler...');
+            testBtn.onclick = function() {
+                console.log('Filter button clicked (immediate handler)');
+                const modal = document.getElementById('filterModal');
+                if (modal) {
+                    modal.style.display = 'block';
+                    console.log('Modal displayed');
+                } else {
+                    console.log('Modal not found');
+                }
+            };
+        }
+    </script>
+</body>
+</html>

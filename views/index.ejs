@@ -1,0 +1,56 @@
+<%- include('partials/header') %>
+<%- include('partials/nav') %>
+
+<main class="dashboard-grid">
+    <div class="form-section">
+        <h1>Add New Booking</h1>
+        <form action="/add-booking" method="POST">
+            <label for="customer_name">Customer Name</label>
+            <input type="text" id="customer_name" name="customer_name" required>
+
+            <label for="phone_number">Phone Number</label>
+            <input type="tel" id="phone_number" name="phone_number" required>
+
+            <label for="cloth_color">Cloth Color/Details</label>
+            <input type="text" id="cloth_color" name="cloth_color">
+            
+            <label for="booking_date">Booking Date</label>
+            <input type="date" id="booking_date" name="booking_date" value="<%= new Date().toISOString().slice(0, 10) %>" required>
+
+            <label for="delivery_date">Delivery Date</label>
+            <input type="date" id="delivery_date" name="delivery_date" required>
+
+            <label for="total_amount">Total Amount (₹)</label>
+            <input type="number" id="total_amount" name="total_amount" step="0.01" required>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="emergency" name="emergency" value="true">
+                <label for="emergency">Emergency Delivery</label>
+            </div>
+
+            <button type="submit" class="btn-primary">Add Booking</button>
+        </form>
+    </div>
+
+    <div class="info-section">
+        <h2>Today's Deliveries</h2>
+        <div class="deliveries-list">
+            <% if (todaysDeliveries.length > 0) { %>
+                <% todaysDeliveries.forEach(booking => { %>
+                    <div class="delivery-item">
+                        <p><strong><%= booking.customer_name %></strong> - <%= booking.phone_number %></p>
+                        <p>Color: <%= booking.cloth_color %></p>
+                        <% if (booking.is_emergency) { %>
+                            <p class="emergency-tag">EMERGENCY</p>
+                        <% } %>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p>No deliveries scheduled for today.</p>
+            <% } %>
+        </div>
+    </div>
+</main>
+
+</body>
+</html>

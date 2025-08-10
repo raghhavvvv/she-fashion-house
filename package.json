@@ -1,0 +1,24 @@
+{
+  "name": "she-fashion-house-booking-system",
+  "version": "1.0.0",
+  "description": "A booking and payment tracker.",
+  "main": "main.js",
+  "scripts": {
+    "start": "node app.js",
+    "electron-start": "electron .",
+    "package-win": "electron-packager . \"She Fashion House\" --platform=win32 --arch=x64 --out=dist --overwrite",
+    "clean": "rimraf dist",
+    "prepackage-win": "npm run clean"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "electron": "^26.2.2",
+    "electron-packager": "^17.1.2",
+    "rimraf": "^5.0.5"
+  }
+}

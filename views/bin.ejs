@@ -1,0 +1,40 @@
+<%- include('partials/header') %>
+<%- include('partials/nav') %>
+
+<main>
+    <h1>Deleted Items (Bin)</h1>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Customer Name</th>
+                    <th>Phone</th>
+                    <th>Delivery Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% deletedBookings.forEach(booking => { %>
+                    <tr>
+                        <td><%= booking.id %></td>
+                        <td><%= booking.customer_name %></td>
+                        <td><%= booking.phone_number %></td>
+                        <td><%= booking.delivery_date %></td>
+                        <td class="action-buttons">
+                             <form action="/restore-booking/<%= booking.id %>" method="POST" style="display:inline;">
+                                <button type="submit" class="btn-action btn-delivered">Restore</button>
+                            </form>
+                            <form action="/delete-permanent/<%= booking.id %>" method="POST" style="display:inline;" onsubmit="return confirm('This action is permanent and cannot be undone. Are you sure?');">
+                                <button type="submit" class="btn-action btn-delete">Delete Permanently</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+</body>
+</html>

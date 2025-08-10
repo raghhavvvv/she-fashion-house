@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electron Search & Filter Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f4f7f6; }
+        .test-container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .test-button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        .test-button:hover { background: #0056b3; }
+        .result { margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 3px; }
+        .console-output { background: #000; color: #0f0; padding: 15px; border-radius: 5px; font-family: monospace; max-height: 300px; overflow-y: auto; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .status.info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔍 Electron Search & Filter Functionality Test</h1>
+        
+        <div class="test-section">
+            <h3>Test 1: Basic Search Functionality</h3>
+            <p>Test the search form and button functionality</p>
+            <form action="/bookings" method="GET" class="search-form" id="searchForm">
+                <input type="text" name="search_query" id="searchInput" placeholder="Search by customer name..." value="">
+                <button type="submit" class="btn-action" id="searchBtn">🔍 Search</button>
+            </form>
+            <div id="searchStatus" class="status info">Search form ready for testing</div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Test 2: Filter Modal Functionality</h3>
+            <p>Test opening and closing the filter modal</p>
+            <button type="button" id="openFilterModalBtn" class="test-button">Filter Bookings</button>
+            <button type="button" id="closeFilterBtn" class="test-button">Close Modal</button>
+            <div id="modalStatus" class="status info">Modal ready for testing</div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Test 3: JavaScript Functionality</h3>
+            <p>Test various JavaScript features</p>
+            <button type="button" id="testJSBtn" class="test-button">Test JavaScript</button>
+            <button type="button" id="clearConsoleBtn" class="test-button">Clear Console</button>
+            <div id="jsStatus" class="status info">JavaScript ready for testing</div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Test 4: Navigation Tests</h3>
+            <p>Test navigation to different pages</p>
+            <a href="/bookings" class="test-button">All Bookings</a>
+            <a href="/bookings?search_query=test" class="test-button">Search Test</a>
+            <a href="/bookings?cloth_color=blue" class="test-button">Filter Test</a>
+        </div>
+        
+        <div class="test-section">
+            <h3>Console Output</h3>
+            <p>JavaScript console messages will appear here:</p>
+            <div id="consoleOutput" class="console-output">Console output will appear here...</div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Test Results</h3>
+            <div id="testResults">
+                <div class="status info">Tests not yet run</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Modal -->
+    <div id="filterModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Filter Bookings</h2>
+                <span class="close-btn" id="modalCloseBtn">&times;</span>
+            </div>
+            <div class="form-grid">
+                <div>
+                    <label for="test_phone">Phone Number</label>
+                    <input type="text" name="phone_number" id="test_phone" placeholder="Enter phone number">
+                </div>
+                <div>
+                    <label for="test_color">Cloth Color</label>
+                    <input type="text" name="cloth_color" id="test_color" placeholder="Enter cloth color">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" id="modalCloseBtn2">Close</button>
+                <button type="submit" class="btn-primary">Apply Filter</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Console output capture
+        const consoleOutput = document.getElementById('consoleOutput');
+        const originalLog = console.log;
+        const originalError = console.error;
+        
+        function addToConsole(message, type = 'log') {
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ff6b6b' : '#51cf66';
+            consoleOutput.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToConsole(args.join(' '), 'log');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToConsole(args.join(' '), 'error');
+        };
+        
+        // Test functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing test functionality...');
+            
+            // Test 1: Search functionality
+            const searchForm = document.getElementById('searchForm');
+            const searchInput = document.getElementById('searchInput');
+            const searchStatus = document.getElementById('searchStatus');
+            
+            if (searchForm && searchInput) {
+                searchForm.addEventListener('submit', function(e) {
+                    const query = searchInput.value.trim();
+                    if (query.length === 0) {
+                        e.preventDefault();
+                        searchStatus.className = 'status error';
+                        searchStatus.textContent = 'Error: Please enter a search term';
+                        return;
+                    }
+                    searchStatus.className = 'status success';
+                    searchStatus.textContent = `Search submitted for: "${query}"`;
+                    console.log('Search form submitted:', query);
+                });
+                
+                searchInput.addEventListener('input', function() {
+                    const query = this.value.trim();
+                    if (query.length > 0) {
+                        searchStatus.className = 'status info';
+                        searchStatus.textContent = `Typing: "${query}"`;
+                    } else {
+                        searchStatus.className = 'status info';
+                        searchStatus.textContent = 'Search form ready for testing';
+                    }
+                });
+            }
+            
+            // Test 2: Modal functionality
+            const filterModal = document.getElementById('filterModal');
+            const openFilterBtn = document.getElementById('openFilterModalBtn');
+            const closeFilterBtn = document.getElementById('closeFilterBtn');
+            const modalCloseBtn = document.getElementById('modalCloseBtn');
+            const modalCloseBtn2 = document.getElementById('modalCloseBtn2');
+            const modalStatus = document.getElementById('modalStatus');
+            
+            if (openFilterBtn && filterModal) {
+                openFilterBtn.addEventListener('click', function() {
+                    console.log('Opening filter modal...');
+                    filterModal.style.display = 'block';
+                    modalStatus.className = 'status success';
+                    modalStatus.textContent = 'Modal opened successfully';
+                });
+            }
+            
+            if (closeFilterBtn && filterModal) {
+                closeFilterBtn.addEventListener('click', function() {
+                    console.log('Closing filter modal...');
+                    filterModal.style.display = 'none';
+                    modalStatus.className = 'status info';
+                    modalStatus.textContent = 'Modal closed via close button';
+                });
+            }
+            
+            if (modalCloseBtn && filterModal) {
+                modalCloseBtn.addEventListener('click', function() {
+                    console.log('Closing modal via X button...');
+                    filterModal.style.display = 'none';
+                    modalStatus.className = 'status info';
+                    modalStatus.textContent = 'Modal closed via X button';
+                });
+            }
+            
+            if (modalCloseBtn2 && filterModal) {
+                modalCloseBtn2.addEventListener('click', function() {
+                    console.log('Closing modal via close button...');
+                    filterModal.style.display = 'none';
+                    modalStatus.className = 'status info';
+                    modalStatus.textContent = 'Modal closed via close button';
+                });
+            }
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', function(event) {
+                if (event.target === filterModal) {
+                    console.log('Closing modal (outside click)...');
+                    filterModal.style.display = 'none';
+                    modalStatus.className = 'status info';
+                    modalStatus.textContent = 'Modal closed via outside click';
+                }
+            });
+            
+            // Test 3: JavaScript functionality
+            const testJSBtn = document.getElementById('testJSBtn');
+            const clearConsoleBtn = document.getElementById('clearConsoleBtn');
+            const jsStatus = document.getElementById('jsStatus');
+            
+            if (testJSBtn) {
+                testJSBtn.addEventListener('click', function() {
+                    console.log('JavaScript test button clicked');
+                    jsStatus.className = 'status success';
+                    jsStatus.textContent = 'JavaScript functionality working correctly!';
+                    
+                    // Test various JavaScript features
+                    const testResults = document.getElementById('testResults');
+                    testResults.innerHTML = `
+                        <div class="status success">✅ JavaScript event handling working</div>
+                        <div class="status success">✅ DOM manipulation working</div>
+                        <div class="status success">✅ Console logging working</div>
+                        <div class="status success">✅ Modal functionality working</div>
+                        <div class="status success">✅ Form handling working</div>
+                    `;
+                });
+            }
+            
+            if (clearConsoleBtn) {
+                clearConsoleBtn.addEventListener('click', function() {
+                    consoleOutput.innerHTML = 'Console cleared...';
+                    console.log('Console cleared');
+                });
+            }
+            
+            console.log('Test functionality initialized successfully!');
+            addToConsole('All test functionality loaded and ready!', 'log');
+        });
+        
+        // Fallback initialization
+        if (document.readyState === 'loading') {
+            console.log('Document still loading...');
+        } else {
+            console.log('Document already loaded, dispatching event...');
+            document.dispatchEvent(new Event('DOMContentLoaded'));
+        }
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search and Filter Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .test-button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        .test-button:hover { background: #0056b3; }
+        .result { margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>Search and Filter Functionality Test</h1>
+    
+    <div class="test-section">
+        <h3>Test 1: Basic Search</h3>
+        <p>Test the search functionality by searching for customer names</p>
+        <a href="/bookings?search_query=John" class="test-button">Search for "John"</a>
+        <a href="/bookings?search_query=Smith" class="test-button">Search for "Smith"</a>
+        <a href="/bookings" class="test-button">Clear Search</a>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 2: Date Filters</h3>
+        <p>Test date-based filtering</p>
+        <a href="/bookings?delivery_date_status=today" class="test-button">Today's Deliveries</a>
+        <a href="/bookings?delivery_date_status=past" class="test-button">Past Deliveries</a>
+        <a href="/bookings?delivery_date_status=upcoming" class="test-button">Upcoming Deliveries</a>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 3: Status Filters</h3>
+        <p>Test status-based filtering</p>
+        <a href="/bookings?delivery_status=Delivered" class="test-button">Delivered</a>
+        <a href="/bookings?delivery_status=Not%20Delivered" class="test-button">Not Delivered</a>
+        <a href="/bookings?payment_status=Pending" class="test-button">Payment Pending</a>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 4: Combined Filters</h3>
+        <p>Test multiple filters together</p>
+        <a href="/bookings?search_query=John&delivery_status=Not%20Delivered&emergency=1" class="test-button">John + Not Delivered + Emergency</a>
+        <a href="/bookings?delivery_date_status=today&emergency=1" class="test-button">Today + Emergency</a>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 5: Phone Number Search</h3>
+        <p>Test phone number search with different formats</p>
+        <a href="/bookings?phone_number=123" class="test-button">Phone: 123</a>
+        <a href="/bookings?phone_number=456-789" class="test-button">Phone: 456-789</a>
+        <a href="/bookings?phone_number=(555) 123-4567" class="test-button">Phone: (555) 123-4567</a>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 6: Cloth Color Search</h3>
+        <p>Test exact color matching</p>
+        <a href="/bookings?cloth_color=Red" class="test-button">Color: Red</a>
+        <a href="/bookings?cloth_color=Blue" class="test-button">Color: Blue</a>
+        <a href="/bookings?cloth_color=Green" class="test-button">Color: Green</a>
+    </div>
+    
+    <div class="result">
+        <h4>Expected Results:</h4>
+        <ul>
+            <li>Search should work for customer names (case-insensitive)</li>
+            <li>Date filters should show appropriate results</li>
+            <li>Status filters should work correctly</li>
+            <li>Combined filters should work together</li>
+            <li>Phone search should handle different formats</li>
+            <li>Color search should be exact match (case-insensitive)</li>
+            <li>Active filters should be displayed</li>
+            <li>Results count should be shown</li>
+        </ul>
+    </div>
+    
+    <div class="result">
+        <h4>How to Test:</h4>
+        <ol>
+            <li>Make sure the Node.js server is running (npm start)</li>
+            <li>Click on the test links above</li>
+            <li>Verify that the search and filter results are correct</li>
+            <li>Check that the active filters are displayed</li>
+            <li>Test the filter modal by clicking "Filter Bookings"</li>
+            <li>Verify that the search form works with the search button</li>
+        </ol>
+    </div>
+</body>
+</html>

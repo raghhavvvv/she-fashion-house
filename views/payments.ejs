@@ -1,0 +1,70 @@
+<%- include('partials/header') %>
+<%- include('partials/nav') %>
+
+<main>
+    <h1>Payment Management</h1>
+
+    <h2>Pending Payments</h2>
+    <div class="table-container">
+        <table>
+             <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Customer</th>
+                    <th>Total Amt</th>
+                    <th>Amt Paid</th>
+                    <th>Amount Due</th>
+                    <th>Delivery Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% pendingPayments.forEach(booking => { %>
+                    <tr>
+                        <td><%= booking.id %></td>
+                        <td><%= booking.customer_name %></td>
+                        <td>₹<%= booking.total_amount %></td>
+                        <td>₹<%= booking.amount_paid %></td>
+                        <td class="amount-due">₹<%= (booking.total_amount - booking.amount_paid).toFixed(2) %></td>
+                        <td><%= booking.delivery_date %></td>
+                        <td>
+                            <form action="/record-payment/<%= booking.id %>" method="POST" class="payment-form">
+                                <input type="number" name="amount_new" placeholder="Amount" step="0.01" required>
+                                <button type="submit" class="btn-action btn-paid">Record</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+
+    <h2 style="margin-top: 40px;">Completed Payments</h2>
+    <div class="table-container">
+        <table>
+             <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Customer</th>
+                    <th>Total Amount</th>
+                    <th>Delivery Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% completedPayments.forEach(booking => { %>
+                     <tr>
+                        <td><%= booking.id %></td>
+                        <td><%= booking.customer_name %></td>
+                        <td>₹<%= booking.total_amount %></td>
+                        <td><%= booking.delivery_date %></td>
+                        <td><span class="status status-paid"><%= booking.payment_status %></span></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+</body>
+</html>
